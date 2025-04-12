@@ -24,12 +24,14 @@ interface MicrolinkResponse {
   };
 }
 
-function CreateBookmark({ user }: { user: User }) {
-  interface BookmarkValues {
-    groupId: string;
-    value: string;
-    title?: string;
-  }
+// Define BookmarkValues interface outside the component so it can be used in props
+interface BookmarkValues {
+  groupId: string;
+  value: string;
+  title?: string;
+}
+
+function CreateBookmark({ user, draftValues }: { user: User; draftValues?: BookmarkValues }) {
 
   const { handleSubmit, itemProps, setValue, values, reset } = useForm<BookmarkValues>({
     async onSubmit(values) {
@@ -153,13 +155,29 @@ function CreateBookmark({ user }: { user: User }) {
 
   const activeTab = useActiveTab();
   const { data: groups, isLoading: isLoadingGroups } = useGroups(user);
+  
+  // Track if we're loading from a draft to prevent overwriting with active tab
+  const [isLoadingDraft, setIsLoadingDraft] = React.useState(false);
 
+  // Initialize form with draft values if available
   React.useEffect(() => {
-    if (activeTab) {
+    if (draftValues && Object.keys(draftValues).length > 0) {
+      // We have draft values, load them and prevent active tab capture
+      setIsLoadingDraft(true);
+      
+      if (draftValues.groupId) setValue("groupId", draftValues.groupId);
+      if (draftValues.value) setValue("value", draftValues.value);
+      if (draftValues.title) setValue("title", draftValues.title);
+    }
+  }, [draftValues]);
+
+  // Only capture active tab URL if not loading from a draft
+  React.useEffect(() => {
+    if (activeTab && !isLoadingDraft) {
       setValue("value", activeTab.url);
       setValue("title", activeTab.title);
     }
-  }, [activeTab]);
+  }, [activeTab, isLoadingDraft]);
 
   // Store the previous URL to detect changes
   const previousUrlRef = React.useRef("");
@@ -275,6 +293,8 @@ function CreateBookmark({ user }: { user: User }) {
   );
 }
 
-export default function Command() {
-  return <AuthenticatedView component={CreateBookmark} />;
+export default function Command(props: { draftValues?: BookmarkValues }) {
+  return <AuthenticatedView component={(componentProps) => 
+    <CreateBookmark {...componentProps} draftValues={props.draftValues} />
+  } />;
 }
