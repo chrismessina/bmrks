@@ -1,7 +1,7 @@
 import React from "react";
 import colorString from "color-string";
 import { User } from "@supabase/supabase-js";
-import { FormValidation, useForm } from "@raycast/utils";
+import { FormValidation, useForm, showFailureToast } from "@raycast/utils";
 import { Action, ActionPanel, Form, Icon, PopToRootType, Toast, showHUD, showToast } from "@raycast/api";
 import { useGroups } from "../lib/use-groups";
 import * as db from "../lib/db";
@@ -32,7 +32,6 @@ interface BookmarkValues {
 }
 
 function CreateBookmark({ user, draftValues }: { user: User; draftValues?: BookmarkValues }) {
-
   const { handleSubmit, itemProps, setValue, values, reset } = useForm<BookmarkValues>({
     async onSubmit(values) {
       const isValidColor = Boolean(colorString.get(values.value));
@@ -71,9 +70,11 @@ function CreateBookmark({ user, draftValues }: { user: User; draftValues?: Bookm
             if (data.data?.logo?.url) {
               faviconUrl = data.data.logo.url;
             }
+          } else {
+            await showFailureToast("Failed to fetch metadata", new Error(`Status: ${response.status}`));
           }
         } catch (error) {
-          console.error("Error fetching metadata:", error);
+          await showFailureToast("Error fetching metadata", error instanceof Error ? error : new Error(String(error)));
         }
 
         // Fallback for title if Microlink fails
@@ -155,7 +156,7 @@ function CreateBookmark({ user, draftValues }: { user: User; draftValues?: Bookm
 
   const activeTab = useActiveTab();
   const { data: groups, isLoading: isLoadingGroups } = useGroups(user);
-  
+
   // Track if we're loading from a draft to prevent overwriting with active tab
   const [isLoadingDraft, setIsLoadingDraft] = React.useState(false);
 
@@ -164,7 +165,7 @@ function CreateBookmark({ user, draftValues }: { user: User; draftValues?: Bookm
     if (draftValues && Object.keys(draftValues).length > 0) {
       // We have draft values, load them and prevent active tab capture
       setIsLoadingDraft(true);
-      
+
       if (draftValues.groupId) setValue("groupId", draftValues.groupId);
       if (draftValues.value) setValue("value", draftValues.value);
       if (draftValues.title) setValue("title", draftValues.title);
@@ -223,10 +224,15 @@ function CreateBookmark({ user, draftValues }: { user: User; draftValues?: Bookm
             if (data.data?.title) {
               setValue("title", data.data.title);
             }
+          } else {
+            await showFailureToast("Failed to auto-fetch metadata", new Error(`Status: ${response.status}`));
           }
         } catch (error) {
-          console.error("Error auto-fetching metadata:", error);
-          // Silently fail - we don't want to interrupt the user experience
+          await showFailureToast(
+            "Error auto-fetching metadata",
+            error instanceof Error ? error : new Error(String(error)),
+          );
+          // Continue with fallbacks - we don't want to interrupt the user experience
         }
       }
 
@@ -252,7 +258,7 @@ function CreateBookmark({ user, draftValues }: { user: User; draftValues?: Bookm
             {activeGroup && user && (
               <Action.OpenInBrowser
                 title={`Open ${activeGroup.name} in ${BMRKS_SERVICE_NAME}`}
-                url={`${HOST_URL}${user.user_metadata["username"]}/${activeGroup.name.toLowerCase()}`}
+                url={`${HOST_URL}/${user.user_metadata["username"]}/${activeGroup.name.toLowerCase()}`}
               />
             )}
           </ActionPanel.Section>
@@ -294,7 +300,9 @@ function CreateBookmark({ user, draftValues }: { user: User; draftValues?: Bookm
 }
 
 export default function Command(props: { draftValues?: BookmarkValues }) {
-  return <AuthenticatedView component={(componentProps) => 
-    <CreateBookmark {...componentProps} draftValues={props.draftValues} />
-  } />;
+  return (
+    <AuthenticatedView
+      component={(componentProps) => <CreateBookmark {...componentProps} draftValues={props.draftValues} />}
+    />
+  );
 }
