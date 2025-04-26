@@ -1,6 +1,6 @@
 # bmrks Changelog
 
-## [Improvement] - {PR_MERGE_DATE}
+## [Improvement] - 2025-04-24
 
 - Reverted reliance on Raycast Browser Extension 
 - Leveraged Raycast Browser Extension for bookmark title with microlink fallback
