@@ -9,4 +9,4 @@ export const BMRKS_SERVICE_NAME = "(Basic) Bookmarks";
 export const HOST_URL = "https://bmrks.com";
 
 // Supported browsers for active tab retrieval
-export const SUPPORTED_BROWSERS = ["Arc", "Brave Browser", "Google Chrome", "Safari"]
+export const SUPPORTED_BROWSERS = ["Arc", "Brave Browser", "Google Chrome", "Safari"];

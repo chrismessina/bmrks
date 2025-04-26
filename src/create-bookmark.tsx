@@ -11,14 +11,15 @@ import {
   Toast,
   getPreferenceValues,
   showHUD,
-  showToast
+  showToast,
+  showFailureToast,
 } from "@raycast/api";
 import * as db from "../lib/db";
 import { ensureValidUrl } from "../lib/ensure-valid-url";
 import { useActiveTab, getActiveTabFromBrowser } from "../lib/use-active-tab";
 import { useGroups } from "../lib/use-groups";
 import { isUrlLike } from "../lib/is-url-like";
-import { fetchMicrolinkData, MicrolinkResponse } from "../lib/use-microlink";
+import { fetchMicrolinkData } from "../lib/use-microlink";
 import AuthenticatedView from "./components/authenticated-view";
 import { BMRKS_SERVICE_NAME, HOST_URL, SUPPORTED_BROWSERS } from "./constants";
 
@@ -150,7 +151,6 @@ function CreateBookmark({ user }: { user: User }) {
   const activeTab = useActiveTab();
   const { data: groups, isLoading: isLoadingGroups } = useGroups(user);
 
-
   // Store the previous URL to detect changes
   const previousUrlRef = React.useRef("");
   const [initialized, setInitialized] = React.useState(false);
@@ -240,7 +240,6 @@ function CreateBookmark({ user }: { user: User }) {
       itemProps.title.onChange?.(newTitle);
     },
   };
-
 
   // Handler to fetch active tab from a specific browser and update form
   async function fetchTabFromBrowser(browser: string) {
