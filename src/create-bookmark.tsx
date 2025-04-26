@@ -2,7 +2,17 @@ import React from "react";
 import colorString from "color-string";
 import { User } from "@supabase/supabase-js";
 import { FormValidation, useForm, showFailureToast } from "@raycast/utils";
-import { Action, ActionPanel, Form, Icon, PopToRootType, Toast, showHUD, showToast, getPreferenceValues } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  Icon,
+  PopToRootType,
+  Toast,
+  showHUD,
+  showToast,
+  getPreferenceValues,
+} from "@raycast/api";
 import { useGroups } from "../lib/use-groups";
 import * as db from "../lib/db";
 import { ensureValidUrl } from "../lib/ensure-valid-url";
@@ -255,7 +265,6 @@ function CreateBookmark({ user }: { user: User }) {
           </ActionPanel.Section>
         </ActionPanel>
       }
-
     >
       <Form.Dropdown title="Group" placeholder="Select a group for your bookmark" {...itemProps.groupId}>
         {groups && groups.map((group) => <Form.Dropdown.Item key={group.id} value={group.id} title={group.name} />)}
@@ -279,9 +288,5 @@ function CreateBookmark({ user }: { user: User }) {
 }
 
 export default function Command() {
-  return (
-    <AuthenticatedView
-      component={(componentProps) => <CreateBookmark {...componentProps} />}
-    />
-  );
+  return <AuthenticatedView component={(componentProps) => <CreateBookmark {...componentProps} />} />;
 }
