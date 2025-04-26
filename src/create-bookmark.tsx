@@ -12,7 +12,6 @@ import {
   getPreferenceValues,
   showHUD,
   showToast,
-  showFailureToast,
 } from "@raycast/api";
 import * as db from "../lib/db";
 import { ensureValidUrl } from "../lib/ensure-valid-url";
