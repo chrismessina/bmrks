@@ -287,8 +287,25 @@ function CreateBookmark({ user }: { user: User }) {
         </ActionPanel>
       }
     >
-      <Form.Dropdown title="Group" placeholder="Select a group for your bookmark" {...itemProps.groupId}>
-        {groups && groups.map((group) => <Form.Dropdown.Item key={group.id} value={group.id} title={group.name} />)}
+      <Form.Dropdown 
+        title="Group" 
+        placeholder="Select a group for your bookmark" 
+        {...itemProps.groupId}
+      >
+        {groups && groups.length > 0 ? (
+          groups.map((group) => (
+            <Form.Dropdown.Item 
+              key={group.id} 
+              value={group.id} 
+              title={group.name || `Group ${group.id}`} 
+            />
+          ))
+        ) : (
+          <Form.Dropdown.Item 
+            value="all" 
+            title="Bookmarks" 
+          />
+        )}
       </Form.Dropdown>
       <Form.Separator />
       <Form.TextField
